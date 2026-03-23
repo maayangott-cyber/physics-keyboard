@@ -1,0 +1,8 @@
+{
+  "short_name": "PhysicsKeys",
+  "name": "Physics Keyboard Pro",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a73e8",
+  "background_color": "#f8f9fa"
+}
