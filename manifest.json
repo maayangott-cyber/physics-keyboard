@@ -4,5 +4,12 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#1a73e8",
-  "background_color": "#f8f9fa"
+  "background_color": "#f8f9fa",
+  "icons": [
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAfD77YAAAAXVBMVEUAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAGucAnT37AAAAB3RSTlMAECBAUGBwgJCgsMDQ4PEBEhMUGhscHR4fICEiIzMkJSYnKCorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX1BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusrba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f6Yf98vAAABp0lEQVR4nO3b2XLCMAxA0S6B0P7/v60LpS0MIdmYmSOfBy62LpIsS0IAAAAAAAAAAAAAAAAAAAAAAAD8v6Ksc9f0beW6D82M6+S6D8vS9f3vbtq6vR+N8/1r7Y8m+v5Y+4NJU9f979v6S07O939637f19702X7S1+6Gv9Z6UvK13pOQtunN8p6Xz9+6f5u/7P3u9r3f/+vA09r7e+mjsZ70jJW/RHf9p/r7/88fT2Pt666Ox9/XWR2Pv662Pxt7XWx+Nva+3Phr7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvr09j7euvrAAAAAAAAAAAAAAAAAAAAAAAAAADAj/wDLpccS9lO77UAAAAASUVORK5CYII=",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
 }
