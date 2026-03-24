@@ -14,17 +14,16 @@
         body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
-        /* תיבת הטקסט - אנגלית בלבד */
+        /* תיבת טקסט - LTR קשיח */
         #output { width: 100%; height: 220px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; caret-color: var(--primary); }
         
         #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; min-height: 20px; direction: rtl; }
-        #history-panel { width: 100%; display: flex; gap: 8px; overflow-x: auto; padding: 5px; margin-bottom: 15px; min-height: 45px; }
-        .hist-item { background: #e8f0fe; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; color: var(--primary); border: 1px solid #c2d7fa; white-space: nowrap; }
         .actions { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; width: 100%; flex-wrap: wrap; }
-        .btn { padding: 14px 22px; border-radius: 14px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); -webkit-tap-highlight-color: transparent; }
+        .btn { padding: 14px 22px; border-radius: 14px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
         #keyboard-area { position: relative; margin-top: 220px; width: 100px; height: 100px; }
-        #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; z-index: 10; }
+        #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; }
+        
         #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 2px solid var(--primary); border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
         
@@ -32,103 +31,104 @@
         .hidden-panel { transform: translateX(100%); }
         .hidden { display: none !important; }
         .bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
-        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-size: 1.1rem; }
+        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:12px 18px; border-radius:14px; color:white; border:none; cursor:pointer;" onclick="toggleSettings()">⚙️ Bank</button>
+    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:10px 15px; border-radius:14px; color:white; border:none;" onclick="toggleSettings()">⚙️ Bank</button>
 
     <div class="app-container">
-        <textarea id="output" placeholder="English/Math symbols only..." autofocus></textarea>
-        <div id="smart-guide">הסמן יופיע אוטומטית בתוך ה-[?]</div>
-        <div id="history-panel"></div>
+        <textarea id="output" placeholder="English/Math symbols only..."></textarea>
+        <div id="smart-guide">לחץ על סימן כדי להתחיל. עברית חסומה.</div>
         
         <div class="actions">
-            <button class="btn" style="background: var(--success);" onclick="copyText()">Copy</button>
-            <button class="btn" style="background: #f4b400; color: #333;" onclick="jumpToNextField()">Next [?] ⇥</button>
-            <button class="btn" style="background: var(--primary);" onclick="sendAI()">Send AI</button>
-            <button class="btn" style="background: var(--danger);" onclick="clearOutput()">Clear</button>
+            <button class="btn" style="background: var(--success);" onmousedown="event.preventDefault(); copyText()">Copy</button>
+            <button class="btn" style="background: #f4b400; color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
+            <button class="btn" style="background: var(--primary);" onmousedown="event.preventDefault(); sendAI()">Send AI</button>
+            <button class="btn" style="background: var(--danger);" onmousedown="event.preventDefault(); clearOutput()">Clear</button>
         </div>
 
         <div id="keyboard-area">
-            <button id="math-trigger" onclick="event.stopPropagation(); toggleMenu()">#+=</button>
+            <button id="math-trigger" onmousedown="event.preventDefault(); toggleMenu()">#+=</button>
             <div id="radial-menu" class="hidden"></div>
         </div>
     </div>
 
     <div id="settings-panel" class="hidden-panel">
-        <h2>Symbol Bank Pro</h2>
+        <h2>Symbol Bank</h2>
         <div id="bank-container"></div>
         <hr>
-        <h3>Radial Menu</h3>
-        <div id="my-menu-list"></div>
-        <button class="btn" style="background: var(--danger); width: 100%; margin-top: 20px;" onclick="toggleSettings()">Close</button>
+        <button class="btn" style="background: var(--danger); width: 100%;" onclick="toggleSettings()">Close</button>
     </div>
 
     <script>
         const output = document.getElementById('output');
         const menu = document.getElementById('radial-menu');
-        const histPanel = document.getElementById('history-panel');
         const guide = document.getElementById('smart-guide');
 
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial [?]}{\\partial [?]}', cat: 'Calc' },
             { label: '∫', latex: '\\int_{[?]}^{[?]} ', cat: 'Calc' },
+            { label: 'dx', latex: 'dx ', cat: 'Calc' },
             { label: 'ħ', latex: '\\hbar ', cat: 'Physics' },
             { label: 'Ψ', latex: '\\Psi ', cat: 'Physics' },
             { label: '÷', latex: '\\frac{[?]}{[?]}', cat: 'Basic' },
             { label: '√', latex: '\\sqrt{[?]}', cat: 'Basic' },
             { label: 'xⁿ', latex: '^{[?]}', cat: 'Basic' },
-            { label: 'π', latex: '\\pi ', cat: 'Basic' },
             { label: '-', latex: ' - ', cat: 'Basic' }
         ];
 
-        let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 8);
-        let history = JSON.parse(localStorage.getItem('physicsHistory')) || [];
+        let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 9);
 
-        // חסימת עברית ופוקוס
+        // חסימת עברית
         output.addEventListener('input', () => {
             output.value = output.value.replace(/[א-ת]/g, '');
             localStorage.setItem('lastSessionText', output.value);
         });
 
-        // פונקציית הניווט החכמה
+        // --- פונקציית הניווט המתוקנת ---
         function jumpToNextField() {
             const val = output.value;
             const target = "[?]";
-            const index = val.indexOf(target);
             
-            // פוקוס מיידי לאייפד
+            // מחפש את ה-[?] הראשון שמופיע *אחרי* מיקום הסמן הנוכחי
+            let index = val.indexOf(target, output.selectionEnd);
+            
+            // אם לא מצא אחרי, מחפש מההתחלה (לופ)
+            if (index === -1) index = val.indexOf(target);
+            
             output.focus();
-            
             if (index !== -1) {
-                // מסמן את ה- [?] כדי שהקלדה תחליף אותו
-                setTimeout(() => {
-                    output.setSelectionRange(index, index + target.length);
-                }, 10);
+                // מסמן את ה-[?] כדי שהקלדה תחליף אותו
+                output.setSelectionRange(index, index + target.length);
+                guide.innerText = "מלא את השדה המסומן.";
             } else {
                 output.setSelectionRange(val.length, val.length);
+                guide.innerText = "אין יותר שדות [?].";
             }
         }
 
         function renderRadialMenu() {
-            menu.innerHTML = '<div onclick="event.stopPropagation(); toggleMenu()" style="width:70px; height:70px; background:var(--danger); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; cursor:pointer; font-size:1.8rem;">X</div>';
+            menu.innerHTML = '';
             mySymbols.forEach((s, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'symbol-node'; btn.innerText = s.label;
                 const angle = (i * (360 / mySymbols.length)) - 90;
                 btn.style.left = (Math.cos(angle * Math.PI / 180) * 145 + 147.5) + 'px';
                 btn.style.top = (Math.sin(angle * Math.PI / 180) * 145 + 147.5) + 'px';
-                btn.onclick = (e) => {
-                    e.stopPropagation();
+                
+                // שימוש ב-onmousedown למניעת איבוד פוקוס
+                btn.onmousedown = (e) => {
+                    e.preventDefault();
                     const start = output.selectionStart;
                     const end = output.selectionEnd;
                     output.value = output.value.substring(0, start) + s.latex + output.value.substring(end);
                     menu.classList.add('hidden');
                     save();
-                    // הקסם: קפיצה ופוקוס אוטומטי מיד אחרי הוספת הסימן
-                    jumpToNextField();
+                    
+                    // קפיצה לשדה הראשון בתוך הסימן החדש
+                    setTimeout(jumpToNextField, 10);
                 };
                 menu.appendChild(btn);
             });
@@ -137,25 +137,15 @@
         function renderBank() {
             const container = document.getElementById('bank-container');
             container.innerHTML = '';
-            [...new Set(symbolBank.map(s => s.cat))].forEach(cat => {
+            const cats = [...new Set(symbolBank.map(s => s.cat))];
+            cats.forEach(cat => {
                 const grid = document.createElement('div'); grid.className = 'bank-grid';
                 symbolBank.filter(s => s.cat === cat).forEach(s => {
                     const item = document.createElement('div'); item.className = 'bank-item'; item.innerText = s.label;
-                    item.onclick = () => { if(mySymbols.length < 15) { mySymbols.push(s); save(); } };
+                    item.onmousedown = (e) => { e.preventDefault(); if(mySymbols.length < 15) { mySymbols.push(s); save(); } };
                     grid.appendChild(item);
                 });
                 container.innerHTML += `<strong>${cat}</strong>`; container.appendChild(grid);
-            });
-        }
-
-        function renderSettings() {
-            const list = document.getElementById('my-menu-list');
-            list.innerHTML = '';
-            mySymbols.forEach((s, i) => {
-                const div = document.createElement('div');
-                div.style = "display:flex; justify-content:space-between; background:#f1f3f4; padding:10px; margin-bottom:5px; border-radius:10px; direction:ltr;";
-                div.innerHTML = `<span>${s.label}</span><span style="color:red; cursor:pointer;" onclick="removeSymbol(${i})">Del</span>`;
-                list.appendChild(div);
             });
         }
 
@@ -165,17 +155,18 @@
             renderAll();
         }
 
-        function copyText() { output.select(); document.execCommand('copy'); save(); guide.innerText = "Copied!"; }
+        function copyText() { output.select(); document.execCommand('copy'); guide.innerText = "Copied!"; }
         function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
         function toggleMenu() { menu.classList.toggle('hidden'); }
-        function removeSymbol(i) { mySymbols.splice(i, 1); save(); }
         function clearOutput() { if(confirm("Clear?")) { output.value = ""; output.focus(); save(); } }
         function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve: " + output.value)}`, '_blank'); }
 
-        document.addEventListener('click', (e) => { if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden'); });
-        function renderAll() { renderRadialMenu(); renderBank(); renderSettings(); histPanel.innerHTML = history.map(h => `<div class="hist-item" onclick="output.value='${h.replace(/'/g, "\\'")}'; save(); jumpToNextField();">${h.substring(0, 15)}...</div>`).join(''); }
+        document.addEventListener('mousedown', (e) => { 
+            if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden'); 
+        });
         
-        // פוקוס בטעינה ראשונה
+        function renderAll() { renderRadialMenu(); renderBank(); }
+        
         window.onload = () => {
             output.value = localStorage.getItem('lastSessionText') || "";
             renderAll();
