@@ -27,33 +27,40 @@
     </style>
 </head>
 <body>
-    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:12px 18px; border-radius:14px; color:white; border:none; cursor:pointer;" onclick="toggleSettings()">⚙️ Bank</button>
+
+    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:10px 15px; border-radius:14px; color:white; border:none; cursor:pointer;" onclick="toggleSettings()">⚙️ Bank</button>
+
     <div class="app-container">
         <textarea id="output" placeholder="Write LaTeX here..." autofocus></textarea>
-        <div id="smart-guide">הקלד אות כדי להחליף את ה-[?] המסומן.</div>
+        <div id="smart-guide">הקש על #+= ואז על סימן. ה-[?] יסומן אוטומטית.</div>
+        
         <div class="actions">
             <button class="btn" style="background: var(--success);" onmousedown="event.preventDefault(); copyText()">Copy</button>
             <button class="btn" style="background: var(--warning); color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
             <button class="btn" style="background: var(--primary);" onmousedown="event.preventDefault(); sendAI()">Send AI</button>
             <button class="btn" style="background: var(--danger);" onmousedown="event.preventDefault(); clearOutput()">Clear</button>
         </div>
+
         <div id="keyboard-area">
             <button id="math-trigger" onmousedown="event.preventDefault(); toggleMenu()">#+=</button>
             <div id="radial-menu" class="hidden"></div>
         </div>
     </div>
+
     <div id="settings-panel" class="hidden-panel">
         <h2>Symbol Bank Pro</h2>
         <div id="bank-container"></div>
         <hr>
-        <button class="btn" style="background: var(--danger); width: 100%;" onclick="toggleSettings()">Close</button>
+        <button class="btn" style="background: var(--danger); width: 100%;" onclick="forceReset()">איפוס זיכרון (Reset)</button>
+        <button class="btn" style="background: #5f6368; width: 100%; margin-top:10px;" onclick="toggleSettings()">Close</button>
     </div>
+
     <script>
         const output = document.getElementById('output');
         const menu = document.getElementById('radial-menu');
         const guide = document.getElementById('smart-guide');
 
-        // בנק סימנים מעודכן עם פלייסהולדרים מפורשים
+        // בנק סימנים מעודכן - חייב להכיל [?]
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial [?]}{\\partial [?]}', cat: 'Calc' },
             { label: '∫', latex: '\\int_{[?]}^{[?]} ', cat: 'Calc' },
@@ -66,40 +73,43 @@
             { label: '-', latex: ' - ', cat: 'Basic' }
         ];
 
+        // מנגנון עדכון כפוי: אם הזיכרון ישן, נקה אותו
+        let stored = localStorage.getItem('userPhysicsMenu');
+        if (stored && !stored.includes('[?]')) {
+            localStorage.removeItem('userPhysicsMenu');
+        }
+
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 9);
 
-        // חוסם עברית שלא שובר את הסמן
+        function forceReset() {
+            if(confirm("זה ינקה את המניפה ויעדכן את כל הסימנים. להמשיך?")) {
+                localStorage.removeItem('userPhysicsMenu');
+                location.reload();
+            }
+        }
+
         output.addEventListener('input', () => {
             const start = output.selectionStart;
-            if (/[א-ת]/.test(output.value)) {
-                output.value = output.value.replace(/[א-ת]/g, '');
-                output.setSelectionRange(start - 1, start - 1);
-            }
+            output.value = output.value.replace(/[א-ת]/g, '');
             localStorage.setItem('lastSessionText', output.value);
         });
 
-        // פונקציית "ציד" פלייסהולדרים - הכי חזקה שיש
-        function huntPlaceholder(fromIndex = 0) {
+        function selectTarget(startIndex = 0) {
             const val = output.value;
             const target = "[?]";
-            let index = val.indexOf(target, fromIndex);
+            let index = val.indexOf(target, startIndex);
+            if (index === -1) index = val.indexOf(target);
             
-            if (index === -1) index = val.indexOf(target); // חיפוש מעגלי
-            
-            output.focus();
             if (index !== -1) {
-                // המפתח: בחירה כפולה עם Timeout למניעת Override של הדפדפן
+                output.focus();
                 output.setSelectionRange(index, index + target.length);
-                setTimeout(() => {
-                    output.setSelectionRange(index, index + target.length);
-                }, 10);
-            } else {
-                output.setSelectionRange(val.length, val.length);
+                // תיקון לאייפד/מחשב - הבטחת בחירה
+                setTimeout(() => output.setSelectionRange(index, index + target.length), 10);
             }
         }
 
         function jumpToNextField() {
-            huntPlaceholder(output.selectionEnd);
+            selectTarget(output.selectionEnd);
         }
 
         function renderRadialMenu() {
@@ -116,17 +126,18 @@
                     const start = output.selectionStart;
                     const end = output.selectionEnd;
                     
-                    // הזרקה חכמה
+                    // הזרקה אטומית
                     output.setRangeText(s.latex, start, end, 'end');
                     
-                    // מציאת ה-[?] הראשון בביטוי החדש וסימונו
-                    const firstPlaceholder = output.value.indexOf("[?]", start);
+                    // מציאת השדה הראשון בביטוי החדש
+                    const newPartStart = start;
+                    const firstMatch = output.value.indexOf("[?]", newPartStart);
                     
                     menu.classList.add('hidden');
                     save();
 
-                    if (firstPlaceholder !== -1) {
-                        huntPlaceholder(firstPlaceholder);
+                    if (firstMatch !== -1) {
+                        selectTarget(firstMatch);
                     }
                 };
                 menu.appendChild(btn);
