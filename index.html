@@ -10,53 +10,43 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231a73e8%22/><text x=%2250%%22 y=%2265%%22 font-family=%22serif%22 font-size=%2260%22 fill=%22white%22 text-anchor=%22middle%22>ℏ</text></svg>">
     
     <style>
-        :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; --warning: #f4b400; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; }
         body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; }
-        
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        
         #output { width: 100%; height: 200px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; }
-        
         #history-panel { width: 100%; display: flex; gap: 8px; overflow-x: auto; padding: 5px; margin-bottom: 15px; min-height: 40px; }
         .hist-item { background: #e8f0fe; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; color: var(--primary); border: 1px solid #c2d7fa; white-space: nowrap; }
-
         .actions { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; width: 100%; flex-wrap: wrap; }
         .btn { padding: 14px 22px; border-radius: 14px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-
         #keyboard-area { position: relative; margin-top: 220px; width: 100px; height: 100px; }
-        #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; }
-        
+        #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; z-index: 10; }
         #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 2px solid var(--primary); border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        
-        #settings-panel { position: fixed; top: 0; right: 0; width: 380px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.2); padding: 25px; z-index: 3000; overflow-y: auto; transition: 0.3s; text-align: right; }
+        #settings-panel { position: fixed; top: 0; right: 0; width: 380px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.2); padding: 25px; z-index: 4000; overflow-y: auto; transition: 0.3s ease-in-out; text-align: right; }
         .hidden-panel { transform: translateX(100%); }
         .hidden { display: none !important; }
-        
         .bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
         .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-size: 1rem; }
-        
-        .btn-settings { position: fixed; top: 25px; left: 25px; background: #5f6368; z-index: 2500; padding: 10px 15px; border-radius: 12px; color: white; border: none; font-size: 1.2rem; cursor: pointer; }
-        .menu-list-item { display: flex; justify-content: space-between; background: #f1f3f4; padding: 10px; margin-bottom: 8px; border-radius: 10px; }
+        .btn-settings { position: fixed; top: 25px; left: 25px; background: #5f6368; z-index: 3500; padding: 12px 18px; border-radius: 14px; color: white; border: none; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
+        .menu-list-item { display: flex; justify-content: space-between; background: #f1f3f4; padding: 12px; margin-bottom: 8px; border-radius: 10px; align-items: center; }
     </style>
 </head>
 <body>
 
-    <button class="btn-settings" onclick="toggleSettings()">⚙️ בנק</button>
+    <button class="btn-settings" onclick="toggleSettings()">⚙️ פתח בנק</button>
 
     <div class="app-container">
         <textarea id="output" placeholder="כתוב משוואה..."></textarea>
         <div id="history-panel"></div>
-        
         <div class="actions">
             <button class="btn" style="background: var(--success);" onclick="copyText()">העתק</button>
-            <button class="btn" style="background: var(--warning); color: #333;" onclick="jumpToNextField()">הבא ⇥</button>
+            <button class="btn" style="background: #f4b400; color: #333;" onclick="jumpToNextField()">הבא ⇥</button>
             <button class="btn" style="background: var(--primary);" onclick="sendAI()">שלח AI</button>
             <button class="btn" style="background: var(--danger);" onclick="clearOutput()">נקה</button>
         </div>
 
         <div id="keyboard-area">
-            <button id="math-trigger" onclick="event.stopPropagation(); document.getElementById('radial-menu').classList.toggle('hidden')">#+=</button>
+            <button id="math-trigger" onclick="event.stopPropagation(); toggleMenu()">#+=</button>
             <div id="radial-menu" class="hidden"></div>
         </div>
     </div>
@@ -65,30 +55,36 @@
         <h2 style="margin-top:0">בנק סימנים Pro</h2>
         <div id="bank-container"></div>
         <hr>
-        <h3>המניפה שלי</h3>
+        <h3>המניפה שלי (עד 15)</h3>
         <div id="my-menu-list"></div>
         <button class="btn" style="background: var(--danger); width: 100%; margin-top: 20px;" onclick="toggleSettings()">סגור</button>
+        <button class="btn" style="background: #5f6368; width: 100%; margin-top: 10px;" onclick="resetToDefault()">איפוס מניפה</button>
     </div>
 
     <script>
         const output = document.getElementById('output');
         const menu = document.getElementById('radial-menu');
         const histPanel = document.getElementById('history-panel');
+        const settings = document.getElementById('settings-panel');
 
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial {}}{\\partial {}}', pos: 16, cat: 'חדו"א' },
+            { label: '∫', latex: '\\int_{}^{} ', pos: 6, cat: 'חדו"א' },
             { label: 'dx', latex: 'dx ', pos: 3, cat: 'חדו"א' },
             { label: 'dy', latex: 'dy ', pos: 3, cat: 'חדו"א' },
             { label: 'dz', latex: 'dz ', pos: 3, cat: 'חדו"א' },
-            { label: '∫', latex: '\\int_{}^{} ', pos: 6, cat: 'חדו"א' },
             { label: '-', latex: ' - ', pos: 3, cat: 'בסיסי' },
             { label: '÷', latex: '\\frac{}{}', pos: 6, cat: 'בסיסי' },
             { label: '√', latex: '\\sqrt{}', pos: 6, cat: 'בסיסי' },
             { label: 'xⁿ', latex: '^{}', pos: 2, cat: 'בסיסי' },
-            { label: 'ħ', latex: '\\hbar ', pos: 6, cat: 'פיזיקה' }
+            { label: 'ħ', latex: '\\hbar ', pos: 6, cat: 'פיזיקה' },
+            { label: 'Ψ', latex: '\\Psi ', pos: 5, cat: 'פיזיקה' }
         ];
 
-        let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 10);
+        let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || [];
+        // אם המניפה ריקה - טען ברירת מחדל
+        if (mySymbols.length === 0) mySymbols = symbolBank.slice(0, 8);
+        
         let history = JSON.parse(localStorage.getItem('physicsHistory')) || [];
         output.value = localStorage.getItem('lastSessionText') || "";
 
@@ -98,20 +94,18 @@
             renderAll();
         }
 
-        function jumpToNextField() {
-            const val = output.value;
-            const cursor = output.selectionStart;
-            let nextBrace = val.indexOf('{', cursor);
-            if (nextBrace !== -1) {
-                output.focus();
-                output.setSelectionRange(nextBrace + 1, nextBrace + 1);
-            } else {
-                output.setSelectionRange(val.length, val.length);
+        function resetToDefault() {
+            if(confirm("לאפס את המניפה לסימני ברירת המחדל?")) {
+                mySymbols = symbolBank.slice(0, 8);
+                save();
             }
         }
 
+        function toggleSettings() { settings.classList.toggle('hidden-panel'); }
+        function toggleMenu() { menu.classList.toggle('hidden'); }
+
         function renderRadialMenu() {
-            menu.innerHTML = '<div onclick="event.stopPropagation(); menu.classList.add(\'hidden\')" style="width:70px; height:70px; background:var(--danger); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; cursor:pointer; font-size:1.8rem;">X</div>';
+            menu.innerHTML = '<div onclick="event.stopPropagation(); toggleMenu()" style="width:70px; height:70px; background:var(--danger); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; cursor:pointer; font-size:1.8rem; z-index:1001;">X</div>';
             mySymbols.forEach((s, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'symbol-node'; btn.innerText = s.label;
@@ -123,6 +117,7 @@
                     const start = output.selectionStart;
                     output.value = output.value.substring(0, start) + s.latex + output.value.substring(output.selectionEnd);
                     output.focus();
+                    output.setSelectionRange(start + s.pos, start + start + s.pos); // תיקון סמן
                     output.setSelectionRange(start + s.pos, start + s.pos);
                     menu.classList.add('hidden');
                     save();
@@ -134,14 +129,21 @@
         function renderBank() {
             const container = document.getElementById('bank-container');
             container.innerHTML = '';
-            [...new Set(symbolBank.map(s => s.cat))].forEach(cat => {
-                const grid = document.createElement('div'); grid.className = 'bank-grid';
+            const categories = [...new Set(symbolBank.map(s => s.cat))];
+            categories.forEach(cat => {
+                const title = document.createElement('strong');
+                title.innerText = cat;
+                container.appendChild(title);
+                const grid = document.createElement('div');
+                grid.className = 'bank-grid';
                 symbolBank.filter(s => s.cat === cat).forEach(s => {
-                    const item = document.createElement('div'); item.className = 'bank-item'; item.innerText = s.label;
+                    const item = document.createElement('div');
+                    item.className = 'bank-item';
+                    item.innerText = s.label;
                     item.onclick = () => { if(mySymbols.length < 15) { mySymbols.push(s); save(); } };
                     grid.appendChild(item);
                 });
-                container.innerHTML += `<strong>${cat}</strong>`; container.appendChild(grid);
+                container.appendChild(grid);
             });
         }
 
@@ -158,13 +160,25 @@
 
         function renderHistory() {
             histPanel.innerHTML = '';
-            history.forEach((h, i) => {
+            history.forEach(h => {
                 const item = document.createElement('div');
                 item.className = 'hist-item';
                 item.innerText = h.substring(0, 15) + (h.length > 15 ? '...' : '');
                 item.onclick = () => { output.value = h; save(); };
                 histPanel.appendChild(item);
             });
+        }
+
+        function jumpToNextField() {
+            const val = output.value;
+            const cursor = output.selectionStart;
+            let nextBrace = val.indexOf('{', cursor);
+            if (nextBrace !== -1) {
+                output.focus();
+                output.setSelectionRange(nextBrace + 1, nextBrace + 1);
+            } else {
+                output.setSelectionRange(val.length, val.length);
+            }
         }
 
         function copyText() { 
@@ -177,4 +191,16 @@
         }
 
         function removeSymbol(i) { mySymbols.splice(i, 1); save(); }
-        function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel
+        function clearOutput() { if(confirm("למחוק?")) { output.value = ""; save(); } }
+        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("פתור והסבר: " + output.value)}`, '_blank'); }
+
+        output.oninput = () => localStorage.setItem('lastSessionText', output.value);
+        document.addEventListener('click', (e) => { 
+            if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden');
+        });
+        
+        function renderAll() { renderRadialMenu(); renderBank(); renderSettings(); renderHistory(); }
+        renderAll();
+    </script>
+</body>
+</html>
