@@ -6,25 +6,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Physics Keys Pro</title>
-    
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231a73e8%22/><text x=%2250%%22 y=%2265%%22 font-family=%22serif%22 font-size=%2260%22 fill=%22white%22 text-anchor=%22middle%22>ℏ</text></svg>">
-    
     <style>
-        :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; }
-        body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow: hidden; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; --warning: #f4b400; }
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        
-        #output { width: 100%; height: 220px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; caret-color: var(--primary); }
-        
-        #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; min-height: 20px; direction: rtl; }
+        #output { width: 100%; height: 220px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left !important; direction: ltr !important; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; caret-color: var(--primary); }
+        #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; direction: rtl; }
         .actions { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; width: 100%; flex-wrap: wrap; }
         .btn { padding: 14px 22px; border-radius: 14px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); -webkit-tap-highlight-color: transparent; }
-        
         #keyboard-area { position: relative; margin-top: 220px; width: 100px; height: 100px; }
         #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; }
         #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 2px solid var(--primary); border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
-        
+        .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.4rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         #settings-panel { position: fixed; top: 0; right: 0; width: 380px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.2); padding: 25px; z-index: 4000; overflow-y: auto; transition: 0.3s; text-align: right; direction: rtl; }
         .hidden-panel { transform: translateX(100%); }
         .hidden { display: none !important; }
@@ -33,39 +27,33 @@
     </style>
 </head>
 <body>
-
     <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:12px 18px; border-radius:14px; color:white; border:none; cursor:pointer;" onclick="toggleSettings()">⚙️ Bank</button>
-
     <div class="app-container">
-        <textarea id="output" placeholder="English/Math only..." autofocus></textarea>
-        <div id="smart-guide">Next [?] יסמן עבורך את האיבר הבא למילוי.</div>
-        
+        <textarea id="output" placeholder="Write LaTeX here..." autofocus></textarea>
+        <div id="smart-guide">הקלד אות כדי להחליף את ה-[?] המסומן.</div>
         <div class="actions">
             <button class="btn" style="background: var(--success);" onmousedown="event.preventDefault(); copyText()">Copy</button>
-            <button class="btn" style="background: #f4b400; color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
+            <button class="btn" style="background: var(--warning); color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
             <button class="btn" style="background: var(--primary);" onmousedown="event.preventDefault(); sendAI()">Send AI</button>
             <button class="btn" style="background: var(--danger);" onmousedown="event.preventDefault(); clearOutput()">Clear</button>
         </div>
-
         <div id="keyboard-area">
             <button id="math-trigger" onmousedown="event.preventDefault(); toggleMenu()">#+=</button>
             <div id="radial-menu" class="hidden"></div>
         </div>
     </div>
-
     <div id="settings-panel" class="hidden-panel">
-        <h2>Symbol Bank</h2>
+        <h2>Symbol Bank Pro</h2>
         <div id="bank-container"></div>
         <hr>
         <button class="btn" style="background: var(--danger); width: 100%;" onclick="toggleSettings()">Close</button>
     </div>
-
     <script>
         const output = document.getElementById('output');
         const menu = document.getElementById('radial-menu');
         const guide = document.getElementById('smart-guide');
 
-        // בנק סימנים מעודכן עם פלייסהולדרים [?]
+        // בנק סימנים מעודכן עם פלייסהולדרים מפורשים
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial [?]}{\\partial [?]}', cat: 'Calc' },
             { label: '∫', latex: '\\int_{[?]}^{[?]} ', cat: 'Calc' },
@@ -80,8 +68,8 @@
 
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 9);
 
-        // חוסם עברית חכם
-        output.addEventListener('input', (e) => {
+        // חוסם עברית שלא שובר את הסמן
+        output.addEventListener('input', () => {
             const start = output.selectionStart;
             if (/[א-ת]/.test(output.value)) {
                 output.value = output.value.replace(/[א-ת]/g, '');
@@ -90,27 +78,28 @@
             localStorage.setItem('lastSessionText', output.value);
         });
 
-        // פונקציית בחירה סופר-יציבה (Focus Lock)
-        function selectPlaceholder(startIndex = 0) {
+        // פונקציית "ציד" פלייסהולדרים - הכי חזקה שיש
+        function huntPlaceholder(fromIndex = 0) {
             const val = output.value;
             const target = "[?]";
-            let index = val.indexOf(target, startIndex);
+            let index = val.indexOf(target, fromIndex);
             
             if (index === -1) index = val.indexOf(target); // חיפוש מעגלי
             
+            output.focus();
             if (index !== -1) {
-                output.focus();
-                // בחירה כפולה למניעת "בריחה" באייפד
+                // המפתח: בחירה כפולה עם Timeout למניעת Override של הדפדפן
                 output.setSelectionRange(index, index + target.length);
                 setTimeout(() => {
                     output.setSelectionRange(index, index + target.length);
-                }, 50);
+                }, 10);
+            } else {
+                output.setSelectionRange(val.length, val.length);
             }
         }
 
         function jumpToNextField() {
-            // מתחיל לחפש מיד אחרי הבחירה הנוכחית
-            selectPlaceholder(output.selectionEnd);
+            huntPlaceholder(output.selectionEnd);
         }
 
         function renderRadialMenu() {
@@ -127,17 +116,17 @@
                     const start = output.selectionStart;
                     const end = output.selectionEnd;
                     
-                    // הזרקת טקסט אטומית - לא מסמנת את כל הביטוי
+                    // הזרקה חכמה
                     output.setRangeText(s.latex, start, end, 'end');
                     
-                    // מציאת ה-[?] הראשון שהוספנו עכשיו
-                    const firstNew = output.value.indexOf("[?]", start);
+                    // מציאת ה-[?] הראשון בביטוי החדש וסימונו
+                    const firstPlaceholder = output.value.indexOf("[?]", start);
                     
                     menu.classList.add('hidden');
                     save();
 
-                    if (firstNew !== -1) {
-                        selectPlaceholder(firstNew);
+                    if (firstPlaceholder !== -1) {
+                        huntPlaceholder(firstPlaceholder);
                     }
                 };
                 menu.appendChild(btn);
@@ -168,7 +157,7 @@
         function copyText() { output.select(); document.execCommand('copy'); guide.innerText = "Copied!"; }
         function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
         function toggleMenu() { menu.classList.toggle('hidden'); }
-        function clearOutput() { if(confirm("Clear everything?")) { output.value = ""; output.focus(); save(); } }
+        function clearOutput() { if(confirm("Clear?")) { output.value = ""; output.focus(); save(); } }
         function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve: " + output.value)}`, '_blank'); }
 
         document.addEventListener('mousedown', (e) => { 
