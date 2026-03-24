@@ -29,21 +29,20 @@
         .hidden-panel { transform: translateX(100%); }
         .hidden { display: none !important; }
         .bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
-        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; }
+        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:10px 15px; border-radius:14px; color:white; border:none;" onclick="toggleSettings()">⚙️ Bank</button>
+    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:12px 18px; border-radius:14px; color:white; border:none; cursor:pointer;" onclick="toggleSettings()">⚙️ Bank</button>
 
     <div class="app-container">
-        <textarea id="output" placeholder="English/Math symbols only..."></textarea>
+        <textarea id="output" placeholder="English/Math only..." autofocus></textarea>
         <div id="smart-guide">Next [?] יסמן עבורך את האיבר הבא למילוי.</div>
-        <div id="history-panel" style="display:flex; gap:10px; margin-bottom:10px; overflow-x:auto; width:100%;"></div>
         
         <div class="actions">
             <button class="btn" style="background: var(--success);" onmousedown="event.preventDefault(); copyText()">Copy</button>
-            <button class="btn" id="next-btn" style="background: #f4b400; color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
+            <button class="btn" style="background: #f4b400; color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
             <button class="btn" style="background: var(--primary);" onmousedown="event.preventDefault(); sendAI()">Send AI</button>
             <button class="btn" style="background: var(--danger);" onmousedown="event.preventDefault(); clearOutput()">Clear</button>
         </div>
@@ -66,6 +65,7 @@
         const menu = document.getElementById('radial-menu');
         const guide = document.getElementById('smart-guide');
 
+        // בנק סימנים מעודכן עם פלייסהולדרים [?]
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial [?]}{\\partial [?]}', cat: 'Calc' },
             { label: '∫', latex: '\\int_{[?]}^{[?]} ', cat: 'Calc' },
@@ -80,7 +80,7 @@
 
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 9);
 
-        // חוסם עברית חכם ששומר על מיקום הסמן
+        // חוסם עברית חכם
         output.addEventListener('input', (e) => {
             const start = output.selectionStart;
             if (/[א-ת]/.test(output.value)) {
@@ -90,24 +90,21 @@
             localStorage.setItem('lastSessionText', output.value);
         });
 
-        // פונקציית בחירה סופר-יציבה
+        // פונקציית בחירה סופר-יציבה (Focus Lock)
         function selectPlaceholder(startIndex = 0) {
             const val = output.value;
             const target = "[?]";
             let index = val.indexOf(target, startIndex);
             
-            // אם לא מצאנו מהסמן והלאה, נחפש מהתחלה
-            if (index === -1) index = val.indexOf(target);
+            if (index === -1) index = val.indexOf(target); // חיפוש מעגלי
             
-            output.focus();
             if (index !== -1) {
-                // המפתח כאן: Timeout כפול כדי לוודא שהדפדפן לא "דורס" את הבחירה
+                output.focus();
+                // בחירה כפולה למניעת "בריחה" באייפד
                 output.setSelectionRange(index, index + target.length);
                 setTimeout(() => {
                     output.setSelectionRange(index, index + target.length);
-                }, 0);
-            } else {
-                output.setSelectionRange(val.length, val.length);
+                }, 50);
             }
         }
 
@@ -130,17 +127,17 @@
                     const start = output.selectionStart;
                     const end = output.selectionEnd;
                     
-                    // הזרקה אטומית שלא גורמת לקפיצה לסוף
-                    output.setRangeText(s.latex, start, end, 'select');
+                    // הזרקת טקסט אטומית - לא מסמנת את כל הביטוי
+                    output.setRangeText(s.latex, start, end, 'end');
                     
-                    // מציאת ה-placeholder הראשון בתוך הטקסט החדש שהוספנו
-                    const placeholderIndex = output.value.indexOf("[?]", start);
+                    // מציאת ה-[?] הראשון שהוספנו עכשיו
+                    const firstNew = output.value.indexOf("[?]", start);
                     
                     menu.classList.add('hidden');
                     save();
 
-                    if (placeholderIndex !== -1) {
-                        selectPlaceholder(placeholderIndex);
+                    if (firstNew !== -1) {
+                        selectPlaceholder(firstNew);
                     }
                 };
                 menu.appendChild(btn);
@@ -172,7 +169,7 @@
         function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
         function toggleMenu() { menu.classList.toggle('hidden'); }
         function clearOutput() { if(confirm("Clear everything?")) { output.value = ""; output.focus(); save(); } }
-        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve and explain: " + output.value)}`, '_blank'); }
+        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve: " + output.value)}`, '_blank'); }
 
         document.addEventListener('mousedown', (e) => { 
             if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden'); 
