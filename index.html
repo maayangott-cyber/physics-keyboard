@@ -34,17 +34,14 @@
     <div class="app-container">
         <textarea id="output" placeholder="התחל לכתוב..."></textarea>
         <div id="history-panel"></div>
-        <div id="smart-guide">הוספתי את dx, dy, dz בבנק הסימנים. נסה את הנגזרת כעת.</div>
+        <div id="smart-guide">הבא סודר. נסה לכתוב נגזרת עכשיו.</div>
         <div class="actions">
             <button class="btn" style="background: var(--success);" onclick="copyText()">העתק</button>
             <button class="btn" style="background: var(--warning); color: #333;" onclick="jumpToNextField()">הבא ⇥</button>
             <button class="btn" style="background: var(--primary);" onclick="sendAI()">שלח AI</button>
             <button class="btn" style="background: var(--danger);" onclick="clearOutput()">נקה</button>
         </div>
-        <div id="keyboard-area">
-            <button id="math-trigger">#+=</button>
-            <div id="radial-menu" class="hidden"></div>
-        </div>
+        <div id="keyboard-area"><button id="math-trigger">#+=</button><div id="radial-menu" class="hidden"></div></div>
     </div>
     <div id="settings-panel" class="hidden-panel">
         <h2 style="margin-top:0">בנק סימנים</h2>
@@ -61,16 +58,16 @@
         const histPanel = document.getElementById('history-panel');
 
         const symbolBank = [
-            { label: '∂', latex: '\\frac{\\partial {}}{\\partial {}}', offset: 13, cat: 'חדו"א', hint: "נגזרת חלקית: מלא מונה, אז 'הבא'." },
+            { label: '∂', latex: '\\frac{\\partial {}}{\\partial {}}', offset: 15, cat: 'חדו"א', hint: "נגזרת חלקית: מלא מונה, אז 'הבא'." },
             { label: 'dx', latex: 'dx', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל x." },
             { label: 'dy', latex: 'dy', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל y." },
             { label: 'dz', latex: 'dz', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל z." },
             { label: '∫', latex: '\\int_{}^{} ', offset: 5, cat: 'חדו"א', hint: "אינטגרל." },
             { label: '-', latex: ' - ', offset: 0, cat: 'בסיסי', hint: "מינוס." },
-            { label: 'ħ', latex: '\\hbar ', offset: 0, cat: 'פיזיקה', hint: "קבוע פלאנק." },
-            { label: 'Ψ', latex: '\\Psi ', offset: 0, cat: 'פיזיקה', hint: "פסי." },
+            { label: '÷', latex: '\\frac{}{}', offset: 3, cat: 'בסיסי', hint: "שבר." },
             { label: '√', latex: '\\sqrt{}', offset: 1, cat: 'בסיסי', hint: "שורש." },
-            { label: 'xⁿ', latex: '^{}', offset: 1, cat: 'בסיסי', hint: "חזקה." }
+            { label: 'xⁿ', latex: '^{}', offset: 1, cat: 'בסיסי', hint: "חזקה." },
+            { label: 'ħ', latex: '\\hbar ', offset: 0, cat: 'פיזיקה', hint: "קבוע פלאנק." }
         ];
 
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 10);
@@ -83,26 +80,26 @@
             renderAll();
         }
 
-        // --- מנגנון הדילוג החכם ---
+        // --- התיקון הקריטי: חיפוש שדה ריק ---
         function jumpToNextField() {
             const text = output.value;
             const cursor = output.selectionStart;
             
-            // מחפש את פתח הסוגריים הבא
-            let nextBrace = text.indexOf('{', cursor);
-            
+            // מחפש את ה- "{}" הבא שריק לחלוטין
+            let nextEmpty = text.indexOf('{}', cursor);
+            if (nextEmpty !== -1) {
+                output.focus();
+                output.setSelectionRange(nextEmpty + 1, nextEmpty + 1);
+                guide.innerText = "נחתת בשדה הריק.";
+                return;
+            }
+
+            // אם אין שדה ריק, מחפש סגירת סוגריים כדי לצאת מהביטוי
+            let nextBrace = text.indexOf('}', cursor);
             if (nextBrace !== -1) {
-                // בודק אם מיד אחרי הסוגריים יש מילה טכנית כמו \partial
-                let contentAfterBrace = text.substring(nextBrace + 1, nextBrace + 20);
-                if (contentAfterBrace.startsWith('\\partial')) {
-                    // מדלג מעבר למילה \partial והרווח שאחריה
-                    let innerBrace = text.indexOf('{', nextBrace + 1);
-                    if (innerBrace !== -1) nextBrace = innerBrace;
-                }
-                
                 output.focus();
                 output.setSelectionRange(nextBrace + 1, nextBrace + 1);
-                guide.innerText = "נחתת בשדה הבא.";
+                guide.innerText = "יצאת מהשדה.";
             } else {
                 output.setSelectionRange(text.length, text.length);
                 guide.innerText = "סוף הביטוי.";
