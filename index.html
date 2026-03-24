@@ -34,7 +34,7 @@
     <div class="app-container">
         <textarea id="output" placeholder="התחל לכתוב..."></textarea>
         <div id="history-panel"></div>
-        <div id="smart-guide">מוכן. השתמש בסימן ה'-' וב-'dx/dy' החדשים.</div>
+        <div id="smart-guide">הקלד נגזרת חלקית ונסה את מקש ה'הבא' כעת.</div>
         <div class="actions">
             <button class="btn" style="background: var(--success);" onclick="copyText()">העתק</button>
             <button class="btn" style="background: var(--warning); color: #333;" onclick="jumpToNextField()">הבא ⇥</button>
@@ -65,13 +65,11 @@
             { label: '∫', latex: '\\int_{}^{} ', offset: 5, cat: 'חדו"א', hint: "אינטגרל: גבול תחתון, אז 'הבא'." },
             { label: 'dx', latex: 'dx', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל x." },
             { label: 'dy', latex: 'dy', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל y." },
-            { label: 'dt', latex: 'dt', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל זמן." },
             { label: '-', latex: ' - ', offset: 0, cat: 'בסיסי', hint: "מינוס." },
             { label: '÷', latex: '\\frac{}{}', offset: 3, cat: 'בסיסי', hint: "שבר: מונה, אז 'הבא'." },
             { label: 'ħ', latex: '\\hbar ', offset: 0, cat: 'פיזיקה', hint: "קבוע פלאנק." },
             { label: 'Ψ', latex: '\\Psi ', offset: 0, cat: 'פיזיקה', hint: "פסי." },
             { label: 'θ', latex: '\\theta ', offset: 0, cat: 'יווניות', hint: "תטא." },
-            { label: 'Δ', latex: '\\Delta ', offset: 0, cat: 'יווניות', hint: "דלתא." },
             { label: '√', latex: '\\sqrt{}', offset: 1, cat: 'בסיסי', hint: "שורש." },
             { label: 'xⁿ', latex: '^{}', offset: 1, cat: 'בסיסי', hint: "חזקה." }
         ];
@@ -86,10 +84,22 @@
             renderAll();
         }
 
-        function renderHistory() {
-            histPanel.innerHTML = history.map(h => `<div class="hist-item" onclick="useHistory('${h.replace(/'/g, "\\'")}')">${h.substring(0, 15)}...</div>`).join('');
+        function jumpToNextField() {
+            const text = output.value;
+            const cursor = output.selectionStart;
+            
+            // לוגיקה חדשה: חפש את פתח הסוגריים הבא ותיכנס פנימה
+            let nextBrace = text.indexOf('{', cursor);
+            
+            if (nextBrace !== -1) {
+                output.focus();
+                output.setSelectionRange(nextBrace + 1, nextBrace + 1);
+                guide.innerText = "נחתת בשדה הבא.";
+            } else {
+                output.setSelectionRange(text.length, text.length);
+                guide.innerText = "סוף הביטוי.";
+            }
         }
-        function useHistory(t) { output.value = t; save(); }
 
         function renderRadialMenu() {
             menu.innerHTML = '<div onclick="event.stopPropagation(); menu.classList.add(\'hidden\')" style="width:70px; height:70px; background:var(--danger); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; cursor:pointer; font-size:1.8rem; z-index:1001;">X</div>';
@@ -113,22 +123,8 @@
             });
         }
 
-        function jumpToNextField() {
-            const text = output.value;
-            const cursor = output.selectionStart;
-            // מחפש את הזוג הבא של {} ריקים או את הסוגר הבא
-            let next = text.indexOf('{}', cursor);
-            if (next === -1) next = text.indexOf('}', cursor);
-            
-            if (next !== -1) {
-                output.focus();
-                output.setSelectionRange(next + 1, next + 1);
-                guide.innerText = "עברת לשדה הבא.";
-            } else {
-                output.setSelectionRange(text.length, text.length);
-                guide.innerText = "סוף הביטוי.";
-            }
-        }
+        function renderHistory() { histPanel.innerHTML = history.map(h => `<div class="hist-item" onclick="useHistory('${h.replace(/'/g, "\\'")}')">${h.substring(0, 15)}...</div>`).join(''); }
+        function useHistory(t) { output.value = t; save(); }
 
         function renderBank() {
             const container = document.getElementById('bank-container');
