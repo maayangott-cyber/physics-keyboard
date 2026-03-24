@@ -34,7 +34,7 @@
     <div class="app-container">
         <textarea id="output" placeholder="התחל לכתוב..."></textarea>
         <div id="history-panel"></div>
-        <div id="smart-guide">הקלד נגזרת חלקית ונסה את מקש ה'הבא' כעת.</div>
+        <div id="smart-guide">הוספתי את dx, dy, dz בבנק הסימנים. נסה את הנגזרת כעת.</div>
         <div class="actions">
             <button class="btn" style="background: var(--success);" onclick="copyText()">העתק</button>
             <button class="btn" style="background: var(--warning); color: #333;" onclick="jumpToNextField()">הבא ⇥</button>
@@ -62,14 +62,13 @@
 
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial {}}{\\partial {}}', offset: 13, cat: 'חדו"א', hint: "נגזרת חלקית: מלא מונה, אז 'הבא'." },
-            { label: '∫', latex: '\\int_{}^{} ', offset: 5, cat: 'חדו"א', hint: "אינטגרל: גבול תחתון, אז 'הבא'." },
             { label: 'dx', latex: 'dx', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל x." },
             { label: 'dy', latex: 'dy', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל y." },
+            { label: 'dz', latex: 'dz', offset: 0, cat: 'חדו"א', hint: "דיפרנציאל z." },
+            { label: '∫', latex: '\\int_{}^{} ', offset: 5, cat: 'חדו"א', hint: "אינטגרל." },
             { label: '-', latex: ' - ', offset: 0, cat: 'בסיסי', hint: "מינוס." },
-            { label: '÷', latex: '\\frac{}{}', offset: 3, cat: 'בסיסי', hint: "שבר: מונה, אז 'הבא'." },
             { label: 'ħ', latex: '\\hbar ', offset: 0, cat: 'פיזיקה', hint: "קבוע פלאנק." },
             { label: 'Ψ', latex: '\\Psi ', offset: 0, cat: 'פיזיקה', hint: "פסי." },
-            { label: 'θ', latex: '\\theta ', offset: 0, cat: 'יווניות', hint: "תטא." },
             { label: '√', latex: '\\sqrt{}', offset: 1, cat: 'בסיסי', hint: "שורש." },
             { label: 'xⁿ', latex: '^{}', offset: 1, cat: 'בסיסי', hint: "חזקה." }
         ];
@@ -84,14 +83,23 @@
             renderAll();
         }
 
+        // --- מנגנון הדילוג החכם ---
         function jumpToNextField() {
             const text = output.value;
             const cursor = output.selectionStart;
             
-            // לוגיקה חדשה: חפש את פתח הסוגריים הבא ותיכנס פנימה
+            // מחפש את פתח הסוגריים הבא
             let nextBrace = text.indexOf('{', cursor);
             
             if (nextBrace !== -1) {
+                // בודק אם מיד אחרי הסוגריים יש מילה טכנית כמו \partial
+                let contentAfterBrace = text.substring(nextBrace + 1, nextBrace + 20);
+                if (contentAfterBrace.startsWith('\\partial')) {
+                    // מדלג מעבר למילה \partial והרווח שאחריה
+                    let innerBrace = text.indexOf('{', nextBrace + 1);
+                    if (innerBrace !== -1) nextBrace = innerBrace;
+                }
+                
                 output.focus();
                 output.setSelectionRange(nextBrace + 1, nextBrace + 1);
                 guide.innerText = "נחתת בשדה הבא.";
@@ -125,7 +133,6 @@
 
         function renderHistory() { histPanel.innerHTML = history.map(h => `<div class="hist-item" onclick="useHistory('${h.replace(/'/g, "\\'")}')">${h.substring(0, 15)}...</div>`).join(''); }
         function useHistory(t) { output.value = t; save(); }
-
         function renderBank() {
             const container = document.getElementById('bank-container');
             container.innerHTML = '';
@@ -139,7 +146,6 @@
                 container.innerHTML += `<strong>${cat}</strong>`; container.appendChild(grid);
             });
         }
-
         function renderSettings() {
             const list = document.getElementById('my-menu-list');
             list.innerHTML = '';
@@ -147,7 +153,6 @@
                 list.innerHTML += `<div style="display:flex; justify-content:space-between; background:#f1f3f4; padding:10px; margin-bottom:5px; border-radius:10px;"><span>${s.label}</span><span style="color:red; cursor:pointer;" onclick="removeSymbol(${i})">מחק</span></div>`;
             });
         }
-
         function copyText() { 
             output.select(); document.execCommand('copy'); 
             if(output.value && !history.includes(output.value)) { history.unshift(output.value); if(history.length > 5) history.pop(); localStorage.setItem('physicsHistory', JSON.stringify(history)); }
@@ -161,7 +166,6 @@
         output.oninput = () => localStorage.setItem('lastSessionText', output.value);
         document.getElementById('math-trigger').onclick = (e) => { e.stopPropagation(); menu.classList.toggle('hidden'); };
         document.addEventListener('click', () => menu.classList.add('hidden'));
-        
         function renderAll() { renderRadialMenu(); renderSettings(); renderBank(); renderHistory(); }
         renderAll();
     </script>
