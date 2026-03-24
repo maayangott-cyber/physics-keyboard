@@ -14,7 +14,6 @@
         body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
-        /* תיבת טקסט - LTR קשיח */
         #output { width: 100%; height: 220px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; caret-color: var(--primary); }
         
         #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; min-height: 20px; direction: rtl; }
@@ -40,7 +39,8 @@
 
     <div class="app-container">
         <textarea id="output" placeholder="English/Math symbols only..."></textarea>
-        <div id="smart-guide">Next [?] יסמן עבורך את האיבר הבא למילוי.</div>
+        <div id="smart-guide">השתמש ב-Next כדי לעבור בין [?]</div>
+        <div id="history-panel" style="display:flex; gap:10px; margin-bottom:10px; overflow-x:auto; width:100%;"></div>
         
         <div class="actions">
             <button class="btn" style="background: var(--success);" onmousedown="event.preventDefault(); copyText()">Copy</button>
@@ -81,55 +81,47 @@
 
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 9);
 
-        // חסימת עברית
-        output.addEventListener('input', () => {
-            const filtered = output.value.replace(/[א-ת]/g, '');
-            if (output.value !== filtered) {
+        // חוסם עברית חכם שלא שובר את הסמן
+        output.addEventListener('input', (e) => {
+            const start = output.selectionStart;
+            const end = output.selectionEnd;
+            const original = output.value;
+            const filtered = original.replace(/[א-ת]/g, '');
+            
+            if (original !== filtered) {
                 output.value = filtered;
+                // מחזיר את הסמן למקום הנכון (פחות האות שנמחקה)
+                output.setSelectionRange(start - 1, end - 1);
             }
             localStorage.setItem('lastSessionText', output.value);
         });
 
-        // --- פונקציית הניווט ה"אלים" ---
+        // פונקציית בחירה שעובדת גם במחשב וגם באייפד
+        function applySelection(start, end) {
+            output.focus();
+            output.setSelectionRange(start, end);
+            // לאייפד - מוודא שהבחירה "נתפסת"
+            setTimeout(() => {
+                output.setSelectionRange(start, end);
+            }, 10);
+        }
+
         function jumpToNextField() {
             const val = output.value;
             const target = "[?]";
+            // מחפש את ה-[?] הבא ביחס למיקום הנוכחי
+            let index = val.indexOf(target, output.selectionStart);
             
-            // חיפוש חכם: קודם כל מחפש מהמיקום הנוכחי והלאה
-            let index = val.indexOf(target, output.selectionEnd);
-            
-            // אם לא מצא אחרי, מחפש מההתחלה (מעגלי)
+            // אם לא מצאנו בהמשך, נחפש מההתחלה
             if (index === -1) index = val.indexOf(target);
             
             if (index !== -1) {
                 applySelection(index, index + target.length);
-                guide.innerText = "מלא את השדה המסומן.";
+                guide.innerText = "מלא את האיבר המסומן.";
             } else {
-                // אם אין [?], עובר לסוף
-                output.focus();
-                output.setSelectionRange(val.length, val.length);
-                guide.innerText = "אין יותר שדות [?].";
+                applySelection(val.length, val.length);
+                guide.innerText = "אין יותר שדות למילוי.";
             }
-        }
-
-        // פונקציה שמכריחה את האייפד לסמן את הטקסט
-        function applySelection(start, end) {
-            output.focus();
-            output.setSelectionRange(start, end);
-            
-            // "שומר הראש" - רץ אחרי 50 מילישניות ומחזיר את הסמן אם הוא ברח
-            setTimeout(() => {
-                output.focus();
-                output.setSelectionRange(start, end);
-            }, 50);
-            
-            // ליתר ביטחון, ניסיון שלישי אחרי 150 מילישניות (לאייפדים איטיים)
-            setTimeout(() => {
-                if (output.selectionStart !== start) {
-                    output.focus();
-                    output.setSelectionRange(start, end);
-                }
-            }, 150);
         }
 
         function renderRadialMenu() {
@@ -146,13 +138,13 @@
                     const start = output.selectionStart;
                     const end = output.selectionEnd;
                     
-                    // הזרקת הטקסט
-                    output.value = output.value.substring(0, start) + s.latex + output.value.substring(end);
+                    // הזרקת טקסט חכמה שלא מאבדת סמן במחשב
+                    output.setRangeText(s.latex, start, end, 'end');
                     
                     menu.classList.add('hidden');
                     save();
                     
-                    // פוקוס מיידי על ה-[?] הראשון שנוצר
+                    // מציאת ה-[?] הראשון בתוך מה שהזרקנו
                     const firstNew = output.value.indexOf("[?]", start);
                     if (firstNew !== -1) {
                         applySelection(firstNew, firstNew + 3);
@@ -183,13 +175,7 @@
             renderAll();
         }
 
-        function copyText() { 
-            output.focus();
-            output.select(); 
-            document.execCommand('copy'); 
-            guide.innerText = "Copied!"; 
-        }
-
+        function copyText() { output.select(); document.execCommand('copy'); guide.innerText = "Copied!"; }
         function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
         function toggleMenu() { menu.classList.toggle('hidden'); }
         function clearOutput() { if(confirm("Clear?")) { output.value = ""; output.focus(); save(); } }
