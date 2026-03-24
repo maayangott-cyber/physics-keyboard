@@ -11,7 +11,7 @@
     
     <style>
         :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; }
-        body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow: hidden; }
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         #output { width: 100%; height: 220px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; caret-color: var(--primary); }
@@ -22,7 +22,6 @@
         
         #keyboard-area { position: relative; margin-top: 220px; width: 100px; height: 100px; }
         #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; }
-        
         #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 2px solid var(--primary); border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
         
@@ -39,12 +38,12 @@
 
     <div class="app-container">
         <textarea id="output" placeholder="English/Math symbols only..."></textarea>
-        <div id="smart-guide">השתמש ב-Next כדי לעבור בין [?]</div>
+        <div id="smart-guide">Next [?] יסמן עבורך את האיבר הבא למילוי.</div>
         <div id="history-panel" style="display:flex; gap:10px; margin-bottom:10px; overflow-x:auto; width:100%;"></div>
         
         <div class="actions">
             <button class="btn" style="background: var(--success);" onmousedown="event.preventDefault(); copyText()">Copy</button>
-            <button class="btn" style="background: #f4b400; color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
+            <button class="btn" id="next-btn" style="background: #f4b400; color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
             <button class="btn" style="background: var(--primary);" onmousedown="event.preventDefault(); sendAI()">Send AI</button>
             <button class="btn" style="background: var(--danger);" onmousedown="event.preventDefault(); clearOutput()">Clear</button>
         </div>
@@ -81,47 +80,40 @@
 
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 9);
 
-        // חוסם עברית חכם שלא שובר את הסמן
+        // חוסם עברית חכם ששומר על מיקום הסמן
         output.addEventListener('input', (e) => {
             const start = output.selectionStart;
-            const end = output.selectionEnd;
-            const original = output.value;
-            const filtered = original.replace(/[א-ת]/g, '');
-            
-            if (original !== filtered) {
-                output.value = filtered;
-                // מחזיר את הסמן למקום הנכון (פחות האות שנמחקה)
-                output.setSelectionRange(start - 1, end - 1);
+            if (/[א-ת]/.test(output.value)) {
+                output.value = output.value.replace(/[א-ת]/g, '');
+                output.setSelectionRange(start - 1, start - 1);
             }
             localStorage.setItem('lastSessionText', output.value);
         });
 
-        // פונקציית בחירה שעובדת גם במחשב וגם באייפד
-        function applySelection(start, end) {
+        // פונקציית בחירה סופר-יציבה
+        function selectPlaceholder(startIndex = 0) {
+            const val = output.value;
+            const target = "[?]";
+            let index = val.indexOf(target, startIndex);
+            
+            // אם לא מצאנו מהסמן והלאה, נחפש מהתחלה
+            if (index === -1) index = val.indexOf(target);
+            
             output.focus();
-            output.setSelectionRange(start, end);
-            // לאייפד - מוודא שהבחירה "נתפסת"
-            setTimeout(() => {
-                output.setSelectionRange(start, end);
-            }, 10);
+            if (index !== -1) {
+                // המפתח כאן: Timeout כפול כדי לוודא שהדפדפן לא "דורס" את הבחירה
+                output.setSelectionRange(index, index + target.length);
+                setTimeout(() => {
+                    output.setSelectionRange(index, index + target.length);
+                }, 0);
+            } else {
+                output.setSelectionRange(val.length, val.length);
+            }
         }
 
         function jumpToNextField() {
-            const val = output.value;
-            const target = "[?]";
-            // מחפש את ה-[?] הבא ביחס למיקום הנוכחי
-            let index = val.indexOf(target, output.selectionStart);
-            
-            // אם לא מצאנו בהמשך, נחפש מההתחלה
-            if (index === -1) index = val.indexOf(target);
-            
-            if (index !== -1) {
-                applySelection(index, index + target.length);
-                guide.innerText = "מלא את האיבר המסומן.";
-            } else {
-                applySelection(val.length, val.length);
-                guide.innerText = "אין יותר שדות למילוי.";
-            }
+            // מתחיל לחפש מיד אחרי הבחירה הנוכחית
+            selectPlaceholder(output.selectionEnd);
         }
 
         function renderRadialMenu() {
@@ -138,16 +130,17 @@
                     const start = output.selectionStart;
                     const end = output.selectionEnd;
                     
-                    // הזרקת טקסט חכמה שלא מאבדת סמן במחשב
-                    output.setRangeText(s.latex, start, end, 'end');
+                    // הזרקה אטומית שלא גורמת לקפיצה לסוף
+                    output.setRangeText(s.latex, start, end, 'select');
+                    
+                    // מציאת ה-placeholder הראשון בתוך הטקסט החדש שהוספנו
+                    const placeholderIndex = output.value.indexOf("[?]", start);
                     
                     menu.classList.add('hidden');
                     save();
-                    
-                    // מציאת ה-[?] הראשון בתוך מה שהזרקנו
-                    const firstNew = output.value.indexOf("[?]", start);
-                    if (firstNew !== -1) {
-                        applySelection(firstNew, firstNew + 3);
+
+                    if (placeholderIndex !== -1) {
+                        selectPlaceholder(placeholderIndex);
                     }
                 };
                 menu.appendChild(btn);
@@ -178,8 +171,8 @@
         function copyText() { output.select(); document.execCommand('copy'); guide.innerText = "Copied!"; }
         function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
         function toggleMenu() { menu.classList.toggle('hidden'); }
-        function clearOutput() { if(confirm("Clear?")) { output.value = ""; output.focus(); save(); } }
-        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve: " + output.value)}`, '_blank'); }
+        function clearOutput() { if(confirm("Clear everything?")) { output.value = ""; output.focus(); save(); } }
+        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve and explain: " + output.value)}`, '_blank'); }
 
         document.addEventListener('mousedown', (e) => { 
             if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden'); 
