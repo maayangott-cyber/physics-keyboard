@@ -14,9 +14,10 @@
         body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
-        #output { width: 100%; height: 200px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; -webkit-user-select: text; user-select: text; }
+        /* תיבת הטקסט - אנגלית בלבד */
+        #output { width: 100%; height: 220px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; caret-color: var(--primary); }
         
-        #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; min-height: 20px; direction: rtl; transition: 0.3s; }
+        #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; min-height: 20px; direction: rtl; }
         #history-panel { width: 100%; display: flex; gap: 8px; overflow-x: auto; padding: 5px; margin-bottom: 15px; min-height: 45px; }
         .hist-item { background: #e8f0fe; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; color: var(--primary); border: 1px solid #c2d7fa; white-space: nowrap; }
         .actions { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; width: 100%; flex-wrap: wrap; }
@@ -25,7 +26,7 @@
         #keyboard-area { position: relative; margin-top: 220px; width: 100px; height: 100px; }
         #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; z-index: 10; }
         #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 2px solid var(--primary); border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
         
         #settings-panel { position: fixed; top: 0; right: 0; width: 380px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.2); padding: 25px; z-index: 4000; overflow-y: auto; transition: 0.3s; text-align: right; direction: rtl; }
         .hidden-panel { transform: translateX(100%); }
@@ -36,16 +37,16 @@
 </head>
 <body>
 
-    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:12px 18px; border-radius:14px; color:white; border:none; font-size:1.1rem; cursor:pointer;" onclick="toggleSettings()">⚙️ Bank</button>
+    <button style="position:fixed; top:25px; left:25px; background:#5f6368; z-index:3500; padding:12px 18px; border-radius:14px; color:white; border:none; cursor:pointer;" onclick="toggleSettings()">⚙️ Bank</button>
 
     <div class="app-container">
-        <textarea id="output" placeholder="English/Math only..."></textarea>
-        <div id="smart-guide">מקלדת אנגלית/פיזיקה. עברית חסומה.</div>
+        <textarea id="output" placeholder="English/Math symbols only..." autofocus></textarea>
+        <div id="smart-guide">הסמן יופיע אוטומטית בתוך ה-[?]</div>
         <div id="history-panel"></div>
         
         <div class="actions">
             <button class="btn" style="background: var(--success);" onclick="copyText()">Copy</button>
-            <button class="btn" id="next-btn" style="background: #f4b400; color: #333;" onclick="jumpToNextField()">Next [?] ⇥</button>
+            <button class="btn" style="background: #f4b400; color: #333;" onclick="jumpToNextField()">Next [?] ⇥</button>
             <button class="btn" style="background: var(--primary);" onclick="sendAI()">Send AI</button>
             <button class="btn" style="background: var(--danger);" onclick="clearOutput()">Clear</button>
         </div>
@@ -60,7 +61,7 @@
         <h2>Symbol Bank Pro</h2>
         <div id="bank-container"></div>
         <hr>
-        <h3>My Menu</h3>
+        <h3>Radial Menu</h3>
         <div id="my-menu-list"></div>
         <button class="btn" style="background: var(--danger); width: 100%; margin-top: 20px;" onclick="toggleSettings()">Close</button>
     </div>
@@ -74,48 +75,40 @@
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial [?]}{\\partial [?]}', cat: 'Calc' },
             { label: '∫', latex: '\\int_{[?]}^{[?]} ', cat: 'Calc' },
-            { label: 'dx', latex: 'dx ', cat: 'Calc' },
             { label: 'ħ', latex: '\\hbar ', cat: 'Physics' },
             { label: 'Ψ', latex: '\\Psi ', cat: 'Physics' },
             { label: '÷', latex: '\\frac{[?]}{[?]}', cat: 'Basic' },
             { label: '√', latex: '\\sqrt{[?]}', cat: 'Basic' },
             { label: 'xⁿ', latex: '^{[?]}', cat: 'Basic' },
+            { label: 'π', latex: '\\pi ', cat: 'Basic' },
             { label: '-', latex: ' - ', cat: 'Basic' }
         ];
 
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 8);
         let history = JSON.parse(localStorage.getItem('physicsHistory')) || [];
 
-        // חסימת עברית
+        // חסימת עברית ופוקוס
         output.addEventListener('input', () => {
-            const filtered = output.value.replace(/[א-ת]/g, '');
-            if (output.value !== filtered) {
-                output.value = filtered;
-                showGuide("עברית חסומה למניעת שיבוש.", "#f8d7da");
-            }
+            output.value = output.value.replace(/[א-ת]/g, '');
             localStorage.setItem('lastSessionText', output.value);
         });
 
-        function showGuide(msg, color = "#fff3cd") {
-            guide.innerText = msg;
-            guide.style.background = color;
-        }
-
+        // פונקציית הניווט החכמה
         function jumpToNextField() {
             const val = output.value;
             const target = "[?]";
             const index = val.indexOf(target);
             
+            // פוקוס מיידי לאייפד
+            output.focus();
+            
             if (index !== -1) {
-                // התיקון לאייפד: פוקוס ואז סימון עם דיליי קטן
-                output.focus();
+                // מסמן את ה- [?] כדי שהקלדה תחליף אותו
                 setTimeout(() => {
                     output.setSelectionRange(index, index + target.length);
-                    showGuide("מלא את השדה המסומן.");
                 }, 10);
             } else {
                 output.setSelectionRange(val.length, val.length);
-                showGuide("אין יותר שדות ריקים.");
             }
         }
 
@@ -130,11 +123,12 @@
                 btn.onclick = (e) => {
                     e.stopPropagation();
                     const start = output.selectionStart;
-                    output.value = output.value.substring(0, start) + s.latex + output.value.substring(output.selectionEnd);
+                    const end = output.selectionEnd;
+                    output.value = output.value.substring(0, start) + s.latex + output.value.substring(end);
                     menu.classList.add('hidden');
                     save();
-                    // קפיצה אוטומטית לשדה הראשון בסימן החדש
-                    setTimeout(jumpToNextField, 50);
+                    // הקסם: קפיצה ופוקוס אוטומטי מיד אחרי הוספת הסימן
+                    jumpToNextField();
                 };
                 menu.appendChild(btn);
             });
@@ -159,17 +153,11 @@
             list.innerHTML = '';
             mySymbols.forEach((s, i) => {
                 const div = document.createElement('div');
-                div.className = "menu-list-item";
                 div.style = "display:flex; justify-content:space-between; background:#f1f3f4; padding:10px; margin-bottom:5px; border-radius:10px; direction:ltr;";
-                div.innerHTML = `<span>${s.label}</span><span style="color:red; cursor:pointer; font-weight:bold;" onclick="removeSymbol(${i})">Del</span>`;
+                div.innerHTML = `<span>${s.label}</span><span style="color:red; cursor:pointer;" onclick="removeSymbol(${i})">Del</span>`;
                 list.appendChild(div);
             });
         }
-
-        function renderHistory() {
-            histPanel.innerHTML = history.map(h => `<div class="hist-item" onclick="useHist('${h.replace(/'/g, "\\'")}')">${h.substring(0, 15)}...</div>`).join('');
-        }
-        function useHist(t) { output.value = t; save(); }
 
         function save() {
             localStorage.setItem('userPhysicsMenu', JSON.stringify(mySymbols));
@@ -177,27 +165,22 @@
             renderAll();
         }
 
-        function copyText() { 
-            output.select(); document.execCommand('copy'); 
-            if(output.value && !history.includes(output.value)) { 
-                history.unshift(output.value); if(history.length > 5) history.pop(); 
-                localStorage.setItem('physicsHistory', JSON.stringify(history)); 
-            }
-            save();
-            showGuide("הועתק בהצלחה!", "#d4edda");
-        }
-
+        function copyText() { output.select(); document.execCommand('copy'); save(); guide.innerText = "Copied!"; }
         function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
         function toggleMenu() { menu.classList.toggle('hidden'); }
         function removeSymbol(i) { mySymbols.splice(i, 1); save(); }
-        function clearOutput() { if(confirm("Clear all?")) { output.value = ""; save(); } }
-        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve and explain: " + output.value)}`, '_blank'); }
+        function clearOutput() { if(confirm("Clear?")) { output.value = ""; output.focus(); save(); } }
+        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve: " + output.value)}`, '_blank'); }
 
         document.addEventListener('click', (e) => { if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden'); });
-        function renderAll() { renderRadialMenu(); renderBank(); renderSettings(); renderHistory(); }
+        function renderAll() { renderRadialMenu(); renderBank(); renderSettings(); histPanel.innerHTML = history.map(h => `<div class="hist-item" onclick="output.value='${h.replace(/'/g, "\\'")}'; save(); jumpToNextField();">${h.substring(0, 15)}...</div>`).join(''); }
         
-        output.value = localStorage.getItem('lastSessionText') || "";
-        renderAll();
+        // פוקוס בטעינה ראשונה
+        window.onload = () => {
+            output.value = localStorage.getItem('lastSessionText') || "";
+            renderAll();
+            output.focus();
+        };
     </script>
 </body>
 </html>
