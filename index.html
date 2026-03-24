@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Physics Keys Pro</title>
+    
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231a73e8%22/><text x=%2250%%22 y=%2265%%22 font-family=%22serif%22 font-size=%2260%22 fill=%22white%22 text-anchor=%22middle%22>ℏ</text></svg>">
+    
     <style>
-        :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; --warning: #f4b400; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; }
         body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; }
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
-        /* תיקון קריטי לסמן: תמיד משמאל לימין */
-        #output { width: 100%; height: 200px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left !important; direction: ltr !important; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: monospace; }
+        /* אזור כתיבה - אנגלית בלבד, משמאל לימין */
+        #output { width: 100%; height: 200px; font-size: 1.7rem; padding: 20px; border-radius: 20px; border: 2px solid #e0e0e0; background: white; text-align: left; direction: ltr; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); outline: none; margin-bottom: 10px; font-family: 'Courier New', monospace; }
         
-        #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; min-height: 20px; }
-        #history-panel { width: 100%; display: flex; gap: 8px; overflow-x: auto; padding: 5px; margin-bottom: 15px; min-height: 40px; }
+        #smart-guide { width: 100%; background: #fff3cd; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; text-align: center; font-weight: 500; min-height: 20px; direction: rtl; }
+        #history-panel { width: 100%; display: flex; gap: 8px; overflow-x: auto; padding: 5px; margin-bottom: 15px; }
         .hist-item { background: #e8f0fe; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; color: var(--primary); border: 1px solid #c2d7fa; white-space: nowrap; }
         .actions { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; width: 100%; flex-wrap: wrap; }
         .btn { padding: 14px 22px; border-radius: 14px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -26,29 +28,28 @@
         #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 2px solid var(--primary); border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .symbol-node { position: absolute; width: 62px; height: 62px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #eee; font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         
-        #settings-panel { position: fixed; top: 0; right: 0; width: 380px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.2); padding: 25px; z-index: 4000; overflow-y: auto; transition: 0.3s; text-align: right; }
+        #settings-panel { position: fixed; top: 0; right: 0; width: 380px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.2); padding: 25px; z-index: 4000; overflow-y: auto; transition: 0.3s; text-align: right; direction: rtl; }
         .hidden-panel { transform: translateX(100%); }
         .hidden { display: none !important; }
         .bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
-        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-size: 1rem; }
-        .btn-settings { position: fixed; top: 25px; left: 25px; background: #5f6368; z-index: 3500; padding: 12px 18px; border-radius: 14px; color: white; border: none; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
-        .menu-list-item { display: flex; justify-content: space-between; background: #f1f3f4; padding: 12px; margin-bottom: 8px; border-radius: 10px; align-items: center; }
+        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-size: 1.1rem; }
+        .btn-settings { position: fixed; top: 25px; left: 25px; background: #5f6368; z-index: 3500; padding: 12px 18px; border-radius: 14px; color: white; border: none; font-size: 1.1rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <button class="btn-settings" onclick="toggleSettings()">⚙️ הגדרות מניפה</button>
+    <button class="btn-settings" onclick="toggleSettings()">⚙️ Bank & Menu</button>
 
     <div class="app-container">
-        <textarea id="output" placeholder="Write LaTeX here..."></textarea>
+        <textarea id="output" placeholder="English/Math symbols only..."></textarea>
+        <div id="smart-guide">מקלדת אנגלית/פיזיקה בלבד. עברית חסומה למניעת באגים.</div>
         <div id="history-panel"></div>
-        <div id="smart-guide">מוכן. השתמש ב-'הבא' כדי לעבור בין {}</div>
         
         <div class="actions">
-            <button class="btn" style="background: var(--success);" onclick="copyText()">העתק</button>
-            <button class="btn" style="background: var(--warning); color: #333;" onclick="jumpToNextField()">הבא ⇥</button>
-            <button class="btn" style="background: var(--primary);" onclick="sendAI()">שלח AI</button>
-            <button class="btn" style="background: var(--danger);" onclick="clearOutput()">נקה</button>
+            <button class="btn" style="background: var(--success);" onclick="copyText()">Copy</button>
+            <button class="btn" style="background: #f4b400; color: #333;" onclick="jumpToNextField()">Next [?] ⇥</button>
+            <button class="btn" style="background: var(--primary);" onclick="sendAI()">Send to AI</button>
+            <button class="btn" style="background: var(--danger);" onclick="clearOutput()">Clear</button>
         </div>
 
         <div id="keyboard-area">
@@ -58,62 +59,72 @@
     </div>
 
     <div id="settings-panel" class="hidden-panel">
-        <h2 style="margin-top:0">בנק סימנים מלא</h2>
+        <h2>Symbol Bank Pro</h2>
         <div id="bank-container"></div>
         <hr>
-        <h3>המניפה שלי (עד 15)</h3>
+        <h3>My Radial Menu</h3>
         <div id="my-menu-list"></div>
-        <button class="btn" style="background: var(--danger); width: 100%; margin-top: 20px;" onclick="toggleSettings()">סגור</button>
-        <button class="btn" style="background: #5f6368; width: 100%; margin-top: 10px;" onclick="resetMenu()">איפוס מניפה</button>
+        <button class="btn" style="background: var(--danger); width: 100%; margin-top: 20px;" onclick="toggleSettings()">Close</button>
     </div>
 
     <script>
         const output = document.getElementById('output');
         const menu = document.getElementById('radial-menu');
-        const guide = document.getElementById('smart-guide');
         const histPanel = document.getElementById('history-panel');
-        const settings = document.getElementById('settings-panel');
+        const guide = document.getElementById('smart-guide');
 
+        // שימוש ב- [?] כשדות למילוי
         const symbolBank = [
-            // חדו"א
-            { label: '∂', latex: '\\frac{\\partial {}}{\\partial {}}', pos: 15, cat: 'חדו"א', hint: "נגזרת חלקית: כתוב במונה, אז 'הבא'." },
-            { label: '∫', latex: '\\int_{}^{} ', pos: 5, cat: 'חדו"א', hint: "אינטגרל: גבול תחתון, אז 'הבא'." },
-            { label: '∬', latex: '\\iint_{}^{} ', pos: 6, cat: 'חדו"א', hint: "אינטגרל כפול." },
-            { label: '∇', latex: '\\nabla ', pos: 7, cat: 'חדו"א', hint: "נבלה (גרדיאנט)." },
-            { label: 'dx', latex: 'dx ', pos: 3, cat: 'חדו"א', hint: "דיפרנציאל x." },
-            { label: 'dy', latex: 'dy ', pos: 3, cat: 'חדו"א', hint: "דיפרנציאל y." },
-            { label: 'dt', latex: 'dt ', pos: 3, cat: 'חדו"א', hint: "דיפרנציאל זמן." },
-            // פיזיקה
-            { label: 'ħ', latex: '\\hbar ', pos: 6, cat: 'פיזיקה', hint: "קבוע פלאנק המצומצם." },
-            { label: 'Ψ', latex: '\\Psi ', pos: 5, cat: 'פיזיקה', hint: "פונקציית גל (פסי)." },
-            { label: 'λ', latex: '\\lambda ', pos: 8, cat: 'יווניות', hint: "אורך גל." },
-            { label: 'ω', latex: '\\omega ', pos: 7, cat: 'יווניות', hint: "תדירות זוויתית." },
-            { label: 'θ', latex: '\\theta ', pos: 7, cat: 'יווניות', hint: "זווית (תטא)." },
-            // בסיסי
-            { label: '-', latex: ' - ', pos: 3, cat: 'בסיסי', hint: "מינוס עם רווחים." },
-            { label: '÷', latex: '\\frac{}{}', pos: 6, cat: 'בסיסי', hint: "שבר פשוט." },
-            { label: '√', latex: '\\sqrt{}', pos: 6, cat: 'בסיסי', hint: "שורש ריבועי." },
-            { label: 'xⁿ', latex: '^{}', pos: 2, cat: 'בסיסי', hint: "חזקה." },
-            { label: 'π', latex: '\\pi ', pos: 4, cat: 'בסיסי', hint: "פאי." }
+            { label: '∂', latex: '\\frac{\\partial [?]}{\\partial [?]}', cat: 'Calc' },
+            { label: '∫', latex: '\\int_{[?]}^{[?]} ', cat: 'Calc' },
+            { label: 'dx', latex: 'dx ', cat: 'Calc' },
+            { label: 'dy', latex: 'dy ', cat: 'Calc' },
+            { label: 'dt', latex: 'dt ', cat: 'Calc' },
+            { label: 'ħ', latex: '\\hbar ', cat: 'Physics' },
+            { label: 'Ψ', latex: '\\Psi ', cat: 'Physics' },
+            { label: 'λ', latex: '\\lambda ', cat: 'Greek' },
+            { label: 'θ', latex: '\\theta ', cat: 'Greek' },
+            { label: 'Δ', latex: '\\Delta ', cat: 'Greek' },
+            { label: '÷', latex: '\\frac{[?]}{[?]}', cat: 'Basic' },
+            { label: '√', latex: '\\sqrt{[?]}', cat: 'Basic' },
+            { label: 'xⁿ', latex: '^{[?]}', cat: 'Basic' },
+            { label: '-', latex: ' - ', cat: 'Basic' }
         ];
 
-        let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 10);
+        let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 8);
         let history = JSON.parse(localStorage.getItem('physicsHistory')) || [];
-        output.value = localStorage.getItem('lastSessionText') || "";
 
-        function save() {
-            localStorage.setItem('userPhysicsMenu', JSON.stringify(mySymbols));
+        // חוסם עברית ומתקן כיווניות
+        output.addEventListener('input', (e) => {
+            const originalValue = output.value;
+            const filteredValue = originalValue.replace(/[א-ת]/g, '');
+            if (originalValue !== filteredValue) {
+                output.value = filteredValue;
+                guide.innerText = "נחסמה אות בעברית למניעת שיבוש ב-LaTeX.";
+                guide.style.background = "#f8d7da";
+            }
             localStorage.setItem('lastSessionText', output.value);
-            renderAll();
+        });
+
+        function jumpToNextField() {
+            const val = output.value;
+            const target = "[?]";
+            const index = val.indexOf(target);
+            
+            if (index !== -1) {
+                output.focus();
+                // מסמן את ה- [?] כך שהקלדה עליו תחליף אותו מיד
+                output.setSelectionRange(index, index + target.length);
+                guide.innerText = "מלא את השדה המסומן.";
+                guide.style.background = "#fff3cd";
+            } else {
+                output.setSelectionRange(val.length, val.length);
+                guide.innerText = "אין יותר שדות ריקים.";
+            }
         }
 
-        function resetMenu() { mySymbols = symbolBank.slice(0, 10); save(); }
-
-        function toggleSettings() { settings.classList.toggle('hidden-panel'); }
-        function toggleMenu() { menu.classList.toggle('hidden'); }
-
         function renderRadialMenu() {
-            menu.innerHTML = '<div onclick="event.stopPropagation(); toggleMenu()" style="width:70px; height:70px; background:var(--danger); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; cursor:pointer; font-size:1.8rem;">X</div>';
+            menu.innerHTML = '<div onclick="event.stopPropagation(); toggleMenu()" style="width:70px; height:70px; background:var(--danger); color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; cursor:pointer; font-size:1.8rem; z-index:1001;">X</div>';
             mySymbols.forEach((s, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'symbol-node'; btn.innerText = s.label;
@@ -124,11 +135,9 @@
                     e.stopPropagation();
                     const start = output.selectionStart;
                     output.value = output.value.substring(0, start) + s.latex + output.value.substring(output.selectionEnd);
-                    output.focus();
-                    output.setSelectionRange(start + s.pos, start + s.pos);
-                    guide.innerText = s.hint || "הסימן נוסף.";
                     menu.classList.add('hidden');
                     save();
+                    jumpToNextField(); // קופץ מיד לשדה הראשון בתוך הסימן החדש
                 };
                 menu.appendChild(btn);
             });
@@ -139,18 +148,13 @@
             container.innerHTML = '';
             const cats = [...new Set(symbolBank.map(s => s.cat))];
             cats.forEach(cat => {
-                const section = document.createElement('div');
-                section.innerHTML = `<strong>${cat}</strong>`;
-                const grid = document.createElement('div');
-                grid.className = 'bank-grid';
+                const grid = document.createElement('div'); grid.className = 'bank-grid';
                 symbolBank.filter(s => s.cat === cat).forEach(s => {
-                    const item = document.createElement('div');
-                    item.className = 'bank-item'; item.innerText = s.label;
+                    const item = document.createElement('div'); item.className = 'bank-item'; item.innerText = s.label;
                     item.onclick = () => { if(mySymbols.length < 15) { mySymbols.push(s); save(); } };
                     grid.appendChild(item);
                 });
-                section.appendChild(grid);
-                container.appendChild(section);
+                container.innerHTML += `<strong>${cat}</strong>`; container.appendChild(grid);
             });
         }
 
@@ -159,43 +163,20 @@
             list.innerHTML = '';
             mySymbols.forEach((s, i) => {
                 const div = document.createElement('div');
-                div.className = 'menu-list-item';
-                div.innerHTML = `<span>${s.label}</span><span style="color:red; cursor:pointer; font-weight:bold;" onclick="removeSymbol(${i})">מחק</span>`;
+                div.style = "display:flex; justify-content:space-between; background:#f1f3f4; padding:10px; margin-bottom:5px; border-radius:10px;";
+                div.innerHTML = `<span>${s.label}</span><span style="color:red; cursor:pointer; font-weight:bold;" onclick="removeSymbol(${i})">Delete</span>`;
                 list.appendChild(div);
             });
         }
 
         function renderHistory() {
-            histPanel.innerHTML = '';
-            history.forEach(h => {
-                const item = document.createElement('div');
-                item.className = 'hist-item';
-                item.innerText = h.substring(0, 15) + (h.length > 15 ? '...' : '');
-                item.onclick = () => { output.value = h; save(); };
-                histPanel.appendChild(item);
-            });
+            histPanel.innerHTML = history.map(h => `<div class="hist-item" onclick="output.value='${h.replace(/'/g, "\\'")}'; save();">${h.substring(0, 15)}...</div>`).join('');
         }
 
-        // ניווט משופר: מחפש את ה-{} הריקים הבאים
-        function jumpToNextField() {
-            const val = output.value;
-            const cursor = output.selectionStart;
-            let nextEmpty = val.indexOf('{}', cursor);
-            if (nextEmpty !== -1) {
-                output.focus();
-                output.setSelectionRange(nextEmpty + 1, nextEmpty + 1);
-                guide.innerText = "נחתת בתוך השדה הריק.";
-            } else {
-                let nextBrace = val.indexOf('}', cursor);
-                if (nextBrace !== -1) {
-                    output.focus();
-                    output.setSelectionRange(nextBrace + 1, nextBrace + 1);
-                    guide.innerText = "יצאת מהשדה.";
-                } else {
-                    output.setSelectionRange(val.length, val.length);
-                    guide.innerText = "סוף המשוואה.";
-                }
-            }
+        function save() {
+            localStorage.setItem('userPhysicsMenu', JSON.stringify(mySymbols));
+            localStorage.setItem('lastSessionText', output.value);
+            renderAll();
         }
 
         function copyText() { 
@@ -204,19 +185,19 @@
                 history.unshift(output.value); if(history.length > 5) history.pop(); 
                 localStorage.setItem('physicsHistory', JSON.stringify(history)); 
             }
-            guide.innerText = "הועתק!"; renderHistory();
+            save();
         }
 
+        function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
+        function toggleMenu() { menu.classList.toggle('hidden'); }
         function removeSymbol(i) { mySymbols.splice(i, 1); save(); }
-        function clearOutput() { if(confirm("למחוק הכל?")) { output.value = ""; save(); } }
-        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("פתור והסבר בפירוט: " + output.value)}`, '_blank'); }
+        function clearOutput() { if(confirm("Clear everything?")) { output.value = ""; save(); } }
+        function sendAI() { window.open(`https://gemini.google.com/app?q=${encodeURIComponent("Solve and explain: " + output.value)}`, '_blank'); }
 
-        output.oninput = () => localStorage.setItem('lastSessionText', output.value);
-        document.addEventListener('click', (e) => { 
-            if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden');
-        });
-        
+        document.addEventListener('click', (e) => { if (!menu.contains(e.target) && e.target.id !== 'math-trigger') menu.classList.add('hidden'); });
         function renderAll() { renderRadialMenu(); renderBank(); renderSettings(); renderHistory(); }
+        
+        output.value = localStorage.getItem('lastSessionText') || "";
         renderAll();
     </script>
 </body>
