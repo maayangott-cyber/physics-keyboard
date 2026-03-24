@@ -5,42 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Physics Keys Pro v7.1</title>
+    <title>Physics Keys Pro v8</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231a73e8%22/><text x=%2250%%22 y=%2265%%22 font-family=%22serif%22 font-size=%2260%22 fill=%22white%22 text-anchor=%22middle%22>ℏ</text></svg>">
-    
     <style>
-        :root { --primary: #1a73e8; --bg: #f0f2f5; --danger: #ea4335; --success: #34a853; --warning: #f4b400; --dark: #3c4043; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; --danger: #ea4335; --success: #34a853; --warning: #f4b400; --dark: #3c4043; }
         
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; color: var(--dark); }
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--bg); margin: 0; min-height: 100vh; overflow-x: hidden; color: var(--dark); }
         
         .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
-        #output { width: 100%; height: 180px; font-size: 1.6rem; padding: 20px; border-radius: 20px 20px 0 0; border: 1px solid #dadce0; background: white; text-align: left; direction: ltr; box-sizing: border-box; outline: none; font-family: 'Consolas', 'Courier New', monospace; caret-color: var(--primary); margin-bottom: 0; }
+        /* אזור הכתיבה והתצוגה */
+        #output { width: 100%; height: 180px; font-size: 1.6rem; padding: 20px; border-radius: 20px 20px 0 0; border: 1px solid #dadce0; background: white; text-align: left; direction: ltr; box-sizing: border-box; outline: none; font-family: 'Consolas', monospace; caret-color: var(--primary); margin: 0; }
         
         #preview-container { width: 100%; min-height: 100px; background: #ffffff; border: 1px solid #dadce0; border-top: none; border-radius: 0 0 20px 20px; display: flex; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow-x: auto; }
         
         #smart-guide { width: 100%; background: #fff8e1; color: #b45309; padding: 12px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ffecb3; text-align: center; font-weight: 600; direction: rtl; }
         
-        .actions { display: flex; gap: 12px; margin-bottom: 25px; justify(content: center; width: 100%; flex-wrap: wrap; }
+        /* כפתורים */
+        .actions { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; width: 100%; flex-wrap: wrap; }
         .btn { padding: 14px 24px; border-radius: 16px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
         .btn:active { transform: scale(0.96); }
         
-        #keyboard-area { position: relative; margin-top: 180px; width: 100px; height: 100px; }
-        #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; }
+        /* אזור המקלדת הצפה */
+        #keyboard-area { position: relative; margin-top: 180px; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; }
+        #math-trigger { width: 100px; height: 100px; background: var(--primary); color: white; border: none; border-radius: 50%; font-weight: bold; font-size: 1.5rem; box-shadow: 0 8px 25px rgba(26,115,232,0.4); cursor: pointer; z-index: 10; }
         
-        #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 1px solid #dadce0; border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.15); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .symbol-node { position: absolute; width: 65px; height: 65px; display: flex; justify(content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #f1f3f4; font-size: 1.4rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.06); }
+        #radial-menu { position: absolute; width: 360px; height: 360px; background: rgba(255, 255, 255, 0.98); border: 1px solid #dadce0; border-radius: 50%; top: -380px; left: 50%; transform: translateX(-50%); box-shadow: 0 20px 50px rgba(0,0,0,0.15); z-index: 1000; backdrop-filter: blur(5px); }
+        .symbol-node { position: absolute; width: 65px; height: 65px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 50%; border: 1px solid #f1f3f4; font-size: 1.4rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.06); }
         
+        /* פאנל בנק */
         #settings-panel { position: fixed; top: 0; right: 0; width: 400px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.1); padding: 30px; z-index: 4000; overflow-y: auto; transition: transform 0.3s ease; text-align: right; direction: rtl; }
         .hidden-panel { transform: translateX(100%); }
         .hidden { display: none !important; }
-        
         .bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
-        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #e8eaed; border-radius: 12px; text-align: center; cursor: pointer; font-size: 1.1rem; }
+        .bank-item { padding: 12px 5px; background: #fff; border: 1px solid #e8eaed; border-radius: 12px; text-align: center; cursor: pointer; }
         
         .btn-settings { position: fixed; top: 25px; left: 25px; background: var(--dark); z-index: 3500; padding: 12px 18px; border-radius: 14px; color: white; border: none; cursor: pointer; }
     </style>
@@ -50,14 +51,14 @@
     <button class="btn-settings" onclick="toggleSettings()">⚙️ Bank</button>
 
     <div class="app-container">
-        <textarea id="output" placeholder="English/Math symbols only..." autofocus></textarea>
+        <textarea id="output" placeholder="Write LaTeX..." autofocus></textarea>
         <div id="preview-container"><div id="render-area">Preview...</div></div>
         
-        <div id="smart-guide">Next [?] יסמן עבורך את האיבר הבא למילוי.</div>
+        <div id="smart-guide">השתמש ב-Next כדי לעבור בין [?]</div>
         
         <div class="actions">
             <button class="btn" style="background: var(--success);" onmousedown="event.preventDefault(); copyText()">Copy</button>
-            <button class="btn" id="next-btn" style="background: var(--warning); color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
+            <button class="btn" style="background: var(--warning); color: #333;" onmousedown="event.preventDefault(); jumpToNextField()">Next [?] ⇥</button>
             <button class="btn" style="background: var(--primary);" onmousedown="event.preventDefault(); sendAI()">Send AI</button>
             <button class="btn" style="background: var(--danger);" onmousedown="event.preventDefault(); clearOutput()">Clear</button>
         </div>
@@ -72,7 +73,7 @@
         <h2 style="margin-top:0">Symbol Bank</h2>
         <div id="bank-container"></div>
         <hr style="opacity:0.2; margin:20px 0;">
-        <button class="btn" style="background: var(--danger); width: 100%;" onclick="forceReset()">איפוס זיכרון (Reset)</button>
+        <button class="btn" style="background: var(--danger); width: 100%;" onclick="forceReset()">איפוס עמוק (Reset Everything)</button>
         <button class="btn" style="background: var(--dark); width: 100%; margin-top:10px;" onclick="toggleSettings()">Close</button>
     </div>
 
@@ -82,7 +83,6 @@
         const guide = document.getElementById('smart-guide');
         const renderArea = document.getElementById('render-area');
 
-        // בנק סימנים מעודכן (v7.1)
         const symbolBank = [
             { label: '∂', latex: '\\frac{\\partial [?]}{\\partial [?]}', cat: 'Calc' },
             { label: '∫', latex: '\\int_{[?]}^{[?]} ', cat: 'Calc' },
@@ -91,19 +91,20 @@
             { label: 'Ψ', latex: '\\Psi ', cat: 'Physics' },
             { label: '÷', latex: '\\frac{[?]}{[?]}', cat: 'Basic' },
             { label: '√', latex: '\\sqrt{[?]}', cat: 'Basic' },
-            // התיקון: [?] גם לבסיס וגם לחזקה
-            { label: 'xⁿ', latex: '[?]^{[?]}', cat: 'Basic' },
+            { label: 'xⁿ', latex: '[?]^{[?]}', cat: 'Basic' }, // תיקון חזקה
             { label: 'π', latex: '\\pi ', cat: 'Basic' },
             { label: '-', latex: ' - ', cat: 'Basic' }
         ];
 
+        // ניקוי אוטומטי של זיכרון ישן שאין בו [?]
+        let stored = localStorage.getItem('userPhysicsMenu');
+        if (stored && !stored.includes('[?]')) localStorage.removeItem('userPhysicsMenu');
+
         let mySymbols = JSON.parse(localStorage.getItem('userPhysicsMenu')) || symbolBank.slice(0, 9);
 
-        // עדכון תצוגה מקדימה
         function updatePreview() {
             try {
-                // מנקה את ה-[?] מהתצוגה
-                let cleanText = output.value.replace(/\[\?\]/g, '\\Box'); 
+                let cleanText = output.value.replace(/\[\?\]/g, '\\color{blue}{\\Box}');
                 window.katex.render(cleanText || '\\text{Preview...}', renderArea, { throwOnError: false, displayMode: true });
             } catch (e) { renderArea.innerText = output.value; }
         }
@@ -114,34 +115,23 @@
             updatePreview();
         });
 
-        // פונקציית פוקוס כפולה למניעת בריחה של הסמן באייפד
+        // פונקציית פוקוס כפולה לאייפד
         function applySelection(start, end) {
             output.focus();
             output.setSelectionRange(start, end);
-            
-            // "שומר הראש" - רץ אחרי 50 מילישניות ומחזיר את הסמן אם הוא ברח
-            setTimeout(() => {
-                output.focus();
-                output.setSelectionRange(start, end);
-            }, 50);
-            
-            // ליתר ביטחון, ניסיון שלישי אחרי 150 מילישניות (לאייפדים איטיים)
-            setTimeout(() => {
-                if (output.selectionStart !== start) {
+            // מנגנון ה"התעלקות" למניעת בריחת סמן באייפד
+            [10, 50, 150].forEach(delay => {
+                setTimeout(() => {
                     output.focus();
                     output.setSelectionRange(start, end);
-                }
-            }, 150);
+                }, delay);
+            });
         }
 
         function jumpToNextField() {
             const val = output.value;
             const target = "[?]";
-            
-            // מחפש את ה-[?] שמופיע *אחרי* הסמן הנוכחי
             let index = val.indexOf(target, output.selectionEnd);
-            
-            // אם לא מצא אחרי, מחפש מההתחלה (מעגלי)
             if (index === -1) index = val.indexOf(target);
             
             if (index !== -1) {
@@ -150,7 +140,7 @@
             } else {
                 output.focus();
                 output.setSelectionRange(val.length, val.length);
-                guide.innerText = "אין יותר שדות למילוי.";
+                guide.innerText = "הביטוי הושלם!";
             }
         }
 
@@ -169,13 +159,10 @@
                     const end = output.selectionEnd;
                     output.setRangeText(s.latex, start, end, 'end');
                     
-                    const firstPlaceholder = output.value.indexOf("[?]", start);
+                    const firstNew = output.value.indexOf("[?]", start);
                     menu.classList.add('hidden');
                     save();
-
-                    if (firstPlaceholder !== -1) {
-                        applySelection(firstPlaceholder, firstPlaceholder + 3);
-                    }
+                    if (firstNew !== -1) applySelection(firstNew, firstNew + 3);
                     updatePreview();
                 };
                 menu.appendChild(btn);
@@ -203,7 +190,7 @@
             renderAll();
         }
 
-        function forceReset() { if(confirm("אפס זיכרון?")) { localStorage.removeItem('userPhysicsMenu'); location.reload(); } }
+        function forceReset() { if(confirm("נקה הכל ואפס הגדרות?")) { localStorage.clear(); location.reload(); } }
         function copyText() { output.select(); document.execCommand('copy'); guide.innerText = "Copied!"; }
         function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-panel'); }
         function toggleMenu() { menu.classList.toggle('hidden'); }
